@@ -1,0 +1,187 @@
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(50)
+  description String?
+  users       User[]
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  role_id     Int
+  role        Role      @relation(fields: [role_id], references: [id])
+  name        String    @db.VarChar(100)
+  email       String    @unique @db.VarChar(150)
+  password    String    @db.VarChar(255)
+  phone       String?   @db.VarChar(20)
+  address     String?
+  reset_code  String?   @db.VarChar(255)
+  reset_code_expires  DateTime? @db.DateTime
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  orders      Order[]
+  inventory_movements InventoryMovement[]
+}
+
+model Categoria {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(100)
+  slug        String    @unique @db.VarChar(100)
+  description String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  products    Product[]
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  category_id Int
+  category    Categoria @relation(fields: [category_id], references: [id])
+  sku         String    @unique @db.VarChar(50)
+  name        String    @db.VarChar(150)
+  description String?
+  price       Decimal   @db.Decimal(10, 2)
+  stock       Int
+  is_active   Boolean   @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  histories   History[]
+  product_media ProductMedia[]
+  order_products OrdersProducts[]
+  inventory_movements InventoryMovement[]
+  inventory Inventory[]
+}
+
+model Order {
+  id          Int       @id @default(autoincrement())
+  user_id     Int
+  user        User      @relation(fields: [user_id], references: [id])
+  status      OrderStatus
+  total       Decimal   @db.Decimal(10, 2)
+  address     String    @db.VarChar(255)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  order_products OrdersProducts[]
+  order_media    OrderMedia[]
+  inventory_movements InventoryMovement[]
+}
+
+model OrdersProducts {
+  id          Int       @id @default(autoincrement())
+  order_id    Int
+  product_id  Int
+  quantity    Int
+  price       Decimal   @db.Decimal(10, 2)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  order       Order     @relation(fields: [order_id], references: [id])
+  product     Product   @relation(fields: [product_id], references: [id])
+}
+
+model History {
+  id          Int       @id @default(autoincrement())
+  product_id  Int
+  product     Product   @relation(fields: [product_id], references: [id])
+  title       String    @db.VarChar(150)
+  content     String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  histories_media HistoriesMedia[]
+}
+
+model HistoryMedia {
+  id          Int       @id @default(autoincrement())
+  url         String    @db.VarChar(255)
+  type        MediaType @default(image)
+  alt_text    String?   @db.VarChar(150)
+  uploaded_at DateTime
+  histories_media HistoriesMedia[]
+}
+
+model HistoriesMedia {
+  id          Int       @id @default(autoincrement())
+  history_id  Int
+  media_id    Int
+  caption     String?   @db.VarChar(150)
+  order       Int?
+
+  history     History      @relation(fields: [history_id], references: [id])
+  media       HistoryMedia @relation(fields: [media_id], references: [id])
+}
+
+model ProductMedia {
+  id          Int       @id @default(autoincrement())
+  product_id  Int
+  product     Product   @relation(fields: [product_id], references: [id])
+  url         String    @db.VarChar(255)
+  type        MediaType @default(image)
+  alt_text    String?   @db.VarChar(150)
+  uploaded_at DateTime
+  order       Int?
+}
+
+model OrderMedia {
+  id          Int       @id @default(autoincrement())
+  order_id    Int
+  order       Order     @relation(fields: [order_id], references: [id])
+  url         String    @db.VarChar(255)
+  alt_text    String?   @db.VarChar(150)
+  uploaded_at DateTime
+  caption     String?   @db.VarChar(150)
+  order_num   Int?
+}
+
+model InventoryMovement {
+  id          Int       @id @default(autoincrement())
+  product_id  Int
+  user_id     Int
+  order_id    Int?
+  type        MovementType
+  quantity    Int
+  reason      String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  product     Product   @relation(fields: [product_id], references: [id])
+  user        User      @relation(fields: [user_id], references: [id])
+  order       Order?    @relation(fields: [order_id], references: [id])
+}
+
+model Inventory {
+  id          Int       @id @default(autoincrement())
+  product_id  Int
+  stock    Int
+  minimun_stock Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  product     Product   @relation(fields: [product_id], references: [id])
+}
+
+enum MediaType {
+  image
+  video
+  audio
+}
+
+enum OrderStatus {
+  pendiente
+  pagado
+  enviado
+  cancelado
+}
+
+enum MovementType {
+  entrada
+  salida
+  ajuste
+}
