@@ -21,7 +21,7 @@ export const login = async (req:Request,res:Response)=>{
 
 	const token = jwt.sign({id:user.id, email:user.email},process.env.JWT_SECRET as string,{expiresIn:"8h"});
 
-	return res.status(200).json({user: userWithoutPassword, token });
+	return res.status(200).json({message:"inicio de sesión exitoso.",user: userWithoutPassword, token});
 }
 
 export const logout = async (req:Request, res:Response) => {
@@ -71,14 +71,14 @@ export const requestPasswordReset = async (req:Request, res:Response) => {
 }
 
 export const resetPassword = async (req:Request, res:Response) => {
+	console.log(req.body)
 	const { email, newPassword, repeatPassword, code } = req.body;
 
 	const user = await prisma.user.findUnique({where: {email}});
 	if (!user) return res.status(401).json({ message: "Usuario no encontrado" });
 	if (!user || !user.reset_code || !user.reset_code_expires) {
-    return res.status(400).json({ message: "Solicitud inválida" });
+    return res.status(400).json({ message: "No posee codigo de restablecimiento. Por favor solicite uno nuevo." });
 	}
-
 	if (user.reset_code !== code) {
 		return res.status(400).json({ message: "Código incorrecto" });
 	}
@@ -86,7 +86,6 @@ export const resetPassword = async (req:Request, res:Response) => {
 	if (user.reset_code_expires < new Date()) {
 		return res.status(400).json({ message: "El código ha expirado" });
 	}
-
 
 	if (newPassword !== repeatPassword) {
 		return res.status(400).json({ message: "Las contraseñas no coinciden" });
