@@ -10,5 +10,6 @@ export const addToBlackList = async (token:string)=>{
 export const isBlackListed = async (token:string)=>{
 
 	const result = await redisClient.get(token);
+
 	return result === 'blacklisted';
 }

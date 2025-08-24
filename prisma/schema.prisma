@@ -16,10 +16,11 @@ model Role {
 }
 
 model User {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   role_id     Int
   role        Role      @relation(fields: [role_id], references: [id])
   name        String    @db.VarChar(100)
+  dni         String    @db.VarChar(20)
   email       String    @unique @db.VarChar(150)
   password    String    @db.VarChar(255)
   phone       String?   @db.VarChar(20)
@@ -32,7 +33,7 @@ model User {
   inventory_movements InventoryMovement[]
 }
 
-model Categoria {
+model Category {
   id          Int       @id @default(autoincrement())
   name        String    @db.VarChar(100)
   slug        String    @unique @db.VarChar(100)
@@ -45,16 +46,15 @@ model Categoria {
 model Product {
   id          Int       @id @default(autoincrement())
   category_id Int
-  category    Categoria @relation(fields: [category_id], references: [id])
-  sku         String    @unique @db.VarChar(50)
+  category    Category @relation(fields: [category_id], references: [id])
   name        String    @db.VarChar(150)
   description String?
   price       Decimal   @db.Decimal(10, 2)
-  stock       Int
+  offert      Boolean   @default(false)
   is_active   Boolean   @default(true)
+  deleted_at  DateTime? @db.DateTime
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
-  histories   History[]
   product_media ProductMedia[]
   order_products OrdersProducts[]
   inventory_movements InventoryMovement[]
@@ -91,7 +91,6 @@ model OrdersProducts {
 model History {
   id          Int       @id @default(autoincrement())
   product_id  Int
-  product     Product   @relation(fields: [product_id], references: [id])
   title       String    @db.VarChar(150)
   content     String?
   created_at  DateTime @default(now())
@@ -170,7 +169,6 @@ model Inventory {
 enum MediaType {
   image
   video
-  audio
 }
 
 enum OrderStatus {

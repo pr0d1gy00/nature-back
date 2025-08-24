@@ -8,13 +8,22 @@ export interface UserProps{
 	name: string;
 	email: string;
 	password: string;
+	dni: string;
 	phone?: string;
 	address?: string;
 	created_at: Date;
 	updated_at: Date;
 }
+export type CreateUserProps = Omit<UserProps, 'id' | 'created_at' | 'updated_at' >;
+export type CreateUserPropsWithoutRole = Omit<UserProps, 'id' | 'created_at' | 'updated_at' | 'role_id'>;
 
-export const createUser = async(data:UserProps)=>{
+export const createUser = async(data:CreateUserProps)=>{
+	const userExist = await prisma.user.findUnique({
+		where: { email: data.email }
+	});
+	if (userExist) {
+		throw new Error("El email ya está en uso");
+	}
 	try{
 		return  await prisma.user.create({
 			data

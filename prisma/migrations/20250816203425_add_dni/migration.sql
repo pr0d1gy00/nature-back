@@ -13,11 +13,14 @@ CREATE TABLE `User` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `role_id` INTEGER NOT NULL,
     `name` VARCHAR(100) NOT NULL,
+    `dni` VARCHAR(20) NOT NULL,
     `email` VARCHAR(150) NOT NULL,
     `password` VARCHAR(255) NOT NULL,
     `phone` VARCHAR(20) NULL,
     `address` VARCHAR(191) NULL,
-    `created_at` DATETIME(3) NOT NULL,
+    `reset_code` VARCHAR(255) NULL,
+    `reset_code_expires` DATETIME NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `User_email_key`(`email`),
@@ -25,15 +28,15 @@ CREATE TABLE `User` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Categoria` (
+CREATE TABLE `Category` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(100) NOT NULL,
     `slug` VARCHAR(100) NOT NULL,
     `description` VARCHAR(191) NULL,
-    `created_at` DATETIME(3) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `Categoria_slug_key`(`slug`),
+    UNIQUE INDEX `Category_slug_key`(`slug`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -41,16 +44,13 @@ CREATE TABLE `Categoria` (
 CREATE TABLE `Product` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `category_id` INTEGER NOT NULL,
-    `sku` VARCHAR(50) NOT NULL,
     `name` VARCHAR(150) NOT NULL,
     `description` VARCHAR(191) NULL,
     `price` DECIMAL(10, 2) NOT NULL,
-    `stock` INTEGER NOT NULL,
     `is_active` BOOLEAN NOT NULL DEFAULT true,
-    `created_at` DATETIME(3) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `Product_sku_key`(`sku`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -61,7 +61,7 @@ CREATE TABLE `Order` (
     `status` ENUM('pendiente', 'pagado', 'enviado', 'cancelado') NOT NULL,
     `total` DECIMAL(10, 2) NOT NULL,
     `address` VARCHAR(255) NOT NULL,
-    `created_at` DATETIME(3) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`id`)
@@ -74,7 +74,7 @@ CREATE TABLE `OrdersProducts` (
     `product_id` INTEGER NOT NULL,
     `quantity` INTEGER NOT NULL,
     `price` DECIMAL(10, 2) NOT NULL,
-    `created_at` DATETIME(3) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`id`)
@@ -86,7 +86,7 @@ CREATE TABLE `History` (
     `product_id` INTEGER NOT NULL,
     `title` VARCHAR(150) NOT NULL,
     `content` VARCHAR(191) NULL,
-    `created_at` DATETIME(3) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`id`)
@@ -149,7 +149,19 @@ CREATE TABLE `InventoryMovement` (
     `type` ENUM('entrada', 'salida', 'ajuste') NOT NULL,
     `quantity` INTEGER NOT NULL,
     `reason` VARCHAR(191) NULL,
-    `created_at` DATETIME(3) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Inventory` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `product_id` INTEGER NOT NULL,
+    `stock` INTEGER NOT NULL,
+    `minimun_stock` INTEGER NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`id`)
@@ -159,7 +171,7 @@ CREATE TABLE `InventoryMovement` (
 ALTER TABLE `User` ADD CONSTRAINT `User_role_id_fkey` FOREIGN KEY (`role_id`) REFERENCES `Role`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Product` ADD CONSTRAINT `Product_category_id_fkey` FOREIGN KEY (`category_id`) REFERENCES `Categoria`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Product` ADD CONSTRAINT `Product_category_id_fkey` FOREIGN KEY (`category_id`) REFERENCES `Category`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Order` ADD CONSTRAINT `Order_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -169,9 +181,6 @@ ALTER TABLE `OrdersProducts` ADD CONSTRAINT `OrdersProducts_order_id_fkey` FOREI
 
 -- AddForeignKey
 ALTER TABLE `OrdersProducts` ADD CONSTRAINT `OrdersProducts_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `History` ADD CONSTRAINT `History_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `HistoriesMedia` ADD CONSTRAINT `HistoriesMedia_history_id_fkey` FOREIGN KEY (`history_id`) REFERENCES `History`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -193,3 +202,6 @@ ALTER TABLE `InventoryMovement` ADD CONSTRAINT `InventoryMovement_user_id_fkey` 
 
 -- AddForeignKey
 ALTER TABLE `InventoryMovement` ADD CONSTRAINT `InventoryMovement_order_id_fkey` FOREIGN KEY (`order_id`) REFERENCES `Order`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Inventory` ADD CONSTRAINT `Inventory_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

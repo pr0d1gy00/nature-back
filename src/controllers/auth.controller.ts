@@ -4,6 +4,8 @@ import { PrismaClient, User } from '@prisma/client';
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../services/emailSenderService";
 import { addToBlackList } from "../services/redisServices";
+import {encryptId} from "../services/encryptedId";
+import cookieParser from "cookie-parser";
 
 const prisma = new PrismaClient();
 
@@ -13,24 +15,36 @@ export const login = async (req:Request,res:Response)=>{
 	const user = await prisma.user.findUnique({where: {email}});
 	if (!user) return res.status(401).json({ message: "Usuario no encontrado" });
 
-	const { password: _, ...userWithoutPassword } = user;
+	const { password: _, reset_code: __, reset_code_expires: ___, created_at: ____ , updated_at: _____ , role_id: ______,email:_______, dni: ________ , ...userWithoutPassword } = user;
 
-
+	const encryptedUser = {
+		...userWithoutPassword,
+		id:encryptId(userWithoutPassword.id.toString())
+	}
+	const payload = {
+		email:user.email,
+		id:encryptId(user.id.toString()),
+		role_id:encryptId(user.role_id.toString())
+	}
 	const valid = await bcrypt.compare(password, user.password);
 	if (!valid) return res.status(401).json({ message: "Credenciales Incorrectas" });
 
-	const token = jwt.sign({id:user.id, email:user.email},process.env.JWT_SECRET as string,{expiresIn:"8h"});
-
-	return res.status(200).json({message:"inicio de sesión exitoso.",user: userWithoutPassword, token});
+	const token = jwt.sign(payload,process.env.JWT_SECRET as string,{expiresIn:"8h"});
+	res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 12 * 60 * 60 * 1000
+    });
+    return res.status(200).json({ message: "inicio de sesión exitoso.", user: encryptedUser, token });
 }
 
 export const logout = async (req:Request, res:Response) => {
 	const authHeader = req.headers['authorization'];
 	const token = authHeader && authHeader.split(' ')[1];
-	if(token){
-		await addToBlackList(token);
-	}
-	return res.status(200).json({ message: "Sesión cerrada exitosamente" });
+	res.clearCookie("token");
+	return res.status(200).json({ message: "Sesión cerrada exitosamente" })
+
 }
 
 
@@ -71,7 +85,6 @@ export const requestPasswordReset = async (req:Request, res:Response) => {
 }
 
 export const resetPassword = async (req:Request, res:Response) => {
-	console.log(req.body)
 	const { email, newPassword, repeatPassword, code } = req.body;
 
 	const user = await prisma.user.findUnique({where: {email}});
