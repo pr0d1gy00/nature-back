@@ -1,11 +1,9 @@
 import {Request, Response} from "express";
 import bcrypt from "bcrypt";
-import { PrismaClient, User } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../services/emailSenderService";
-import { addToBlackList } from "../services/redisServices";
 import {encryptId} from "../services/encryptedId";
-import cookieParser from "cookie-parser";
 
 const prisma = new PrismaClient();
 

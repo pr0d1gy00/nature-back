@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const order_controller_1 = require("../controllers/order.controller");
+const uploadFileService_1 = require("../services/uploadFileService");
+const router = (0, express_1.Router)();
+router.post("/createOrders", order_controller_1.createOrder);
+router.post("/uploadMediaShipment", (0, uploadFileService_1.uploadArray)("media", 5), order_controller_1.uploadMediaOrderShipmentController);
+router.post("/uploadMediaPayment", (0, uploadFileService_1.uploadArray)("media", 5), order_controller_1.uploadMediaOrderPaymentController);
+router.put("/updateOrderStatus", order_controller_1.changeStatusOrderController);
+router.get("/getAllOrders", order_controller_1.getOrders);
+router.get("/getOrderById", order_controller_1.getOrderByIdController);
+router.get("/getOrdersByStatus", order_controller_1.getOrdersByStatusController);
+exports.default = router;
