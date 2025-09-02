@@ -11,7 +11,11 @@ import cookieParser from 'cookie-parser';
 import { decryptId } from "./services/encryptedId";
 import inventoryRoutes from "./routes/inventory.routes"
 import storeRoutes from './routes/store.routes'
-//import "./services/schedulerDolar";
+import dolarRoutes from './routes/dolar.routes';
+import commentsRoutes from "./routes/comments.routes";
+import orderRoutes from "./routes/order.routes";
+import profileRoutes from "./routes/profile.routes";
+import "./services/schedulerDolar";
 
 const app = express();
 
@@ -42,8 +46,12 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
+app.use("/api/nature/comments", commentsRoutes);
+app.use("/api/nature/orders", orderRoutes);
+app.use("/api/nature/dolar",dolarRoutes);
 app.use("/api/nature/inventory",authenticateToken,inventoryRoutes);
 app.use("/api/nature/store",storeRoutes);
+app.use("/api/nature/profile", profileRoutes);
 app.post('/api/verify-token', (req, res) => {
   const token = req.cookies?.token;
   if (!token) return res.status(401).json({ ok: false });

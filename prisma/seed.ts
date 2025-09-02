@@ -58,7 +58,37 @@ async function main() {
 			console.log(`Usuario ya existe: ${user.email}`);
 		}
 	}
+
+	const calification =[
+		{
+			label: "Lo Amo",
+			value: 5
+		},
+		{
+			label: "Excelente",
+			value: 4
+		},
+		{
+			label: "Bueno",
+			value: 3
+		},
+		{
+			label: "Regular",
+			value: 2
+		},
+		{
+			label: "Malo",
+			value: 1
+		}
+	]
+	for (const calif of calification){
+		await prisma.califications.create({
+			data: calif
+		});
+	}
 }
+
+
 
 main()
 	.then(() => {
