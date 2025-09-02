@@ -47,7 +47,9 @@ CREATE TABLE `Product` (
     `name` VARCHAR(150) NOT NULL,
     `description` VARCHAR(191) NULL,
     `price` DECIMAL(10, 2) NOT NULL,
+    `offert` BOOLEAN NOT NULL DEFAULT false,
     `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `deleted_at` DATETIME NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
@@ -96,7 +98,7 @@ CREATE TABLE `History` (
 CREATE TABLE `HistoryMedia` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `url` VARCHAR(255) NOT NULL,
-    `type` ENUM('image', 'video', 'audio') NOT NULL DEFAULT 'image',
+    `type` ENUM('image', 'video') NOT NULL DEFAULT 'image',
     `alt_text` VARCHAR(150) NULL,
     `uploaded_at` DATETIME(3) NOT NULL,
 
@@ -119,7 +121,7 @@ CREATE TABLE `ProductMedia` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `product_id` INTEGER NOT NULL,
     `url` VARCHAR(255) NOT NULL,
-    `type` ENUM('image', 'video', 'audio') NOT NULL DEFAULT 'image',
+    `type` ENUM('image', 'video') NOT NULL DEFAULT 'image',
     `alt_text` VARCHAR(150) NULL,
     `uploaded_at` DATETIME(3) NOT NULL,
     `order` INTEGER NULL,
@@ -164,6 +166,29 @@ CREATE TABLE `Inventory` (
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `Inventory_product_id_key`(`product_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Califications` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `label` VARCHAR(100) NOT NULL,
+    `value` INTEGER NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Comments` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `user_id` INTEGER NOT NULL,
+    `product_id` INTEGER NOT NULL,
+    `calification_id` INTEGER NOT NULL,
+    `content` VARCHAR(500) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -205,3 +230,12 @@ ALTER TABLE `InventoryMovement` ADD CONSTRAINT `InventoryMovement_order_id_fkey`
 
 -- AddForeignKey
 ALTER TABLE `Inventory` ADD CONSTRAINT `Inventory_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Comments` ADD CONSTRAINT `Comments_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Comments` ADD CONSTRAINT `Comments_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Comments` ADD CONSTRAINT `Comments_calification_id_fkey` FOREIGN KEY (`calification_id`) REFERENCES `Califications`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

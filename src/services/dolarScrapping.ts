@@ -39,5 +39,4 @@ const scrapeDolarPrice = async () => {
 	await browser.close();
 	return priceNumber;
 };
-scrapeDolarPrice();
 export default scrapeDolarPrice;
