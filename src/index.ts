@@ -30,7 +30,6 @@ interface JwtPayloadInterface extends jwt.JwtPayload {
 app.use(
   cors({
     origin: FRONTEND,
-
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Accept"],
@@ -56,6 +55,8 @@ app.use("/api/nature/store",storeRoutes);
 app.use("/api/nature/profile", profileRoutes);
 app.post('/api/verify-token', (req, res) => {
   const token = req.cookies?.token;
+  console.log(req.cookies.token)
+  console.log(token, 'in verify')
   if (!token) return res.status(401).json({ ok: false });
   try {
       const secret = process.env.JWT_SECRET;
