@@ -28,13 +28,16 @@ export const login = async (req:Request,res:Response)=>{
 	if (!valid) return res.status(401).json({ message: "Credenciales Incorrectas" });
 
 	const token = jwt.sign(payload,process.env.JWT_SECRET as string,{expiresIn:"8h"});
-	res.cookie("token", token, {
+	const cookieOptions = {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'none' as const, // 'as const' ayuda a TypeScript
         secure: process.env.NODE_ENV === "production",
-		path: '/',
+        path: '/',
         maxAge: 12 * 60 * 60 * 1000
-    });
+    };
+    console.log("Intentando establecer cookie. Opciones:", cookieOptions);
+	res.cookie("token", token, cookieOptions);
+
     return res.status(200).json({ message: "inicio de sesión exitoso.", user: encryptedUser, token });
 }
 
