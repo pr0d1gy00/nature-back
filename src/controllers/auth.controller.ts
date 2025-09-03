@@ -33,7 +33,8 @@ export const login = async (req:Request,res:Response)=>{
         sameSite: 'none' as const, // 'as const' ayuda a TypeScript
         secure: process.env.NODE_ENV === "production",
         path: '/',
-        maxAge: 12 * 60 * 60 * 1000
+        maxAge: 12 * 60 * 60 * 1000,
+		domain: process.env.FRONTEND_URL
     };
     console.log("Intentando establecer cookie. Opciones:", cookieOptions);
 	res.cookie("token", token, cookieOptions);
