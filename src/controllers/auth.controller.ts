@@ -30,8 +30,9 @@ export const login = async (req:Request,res:Response)=>{
 	const token = jwt.sign(payload,process.env.JWT_SECRET as string,{expiresIn:"8h"});
 	res.cookie("token", token, {
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: 'lax',
         secure: process.env.NODE_ENV === "production",
+		path: '/',
         maxAge: 12 * 60 * 60 * 1000
     });
     return res.status(200).json({ message: "inicio de sesión exitoso.", user: encryptedUser, token });
