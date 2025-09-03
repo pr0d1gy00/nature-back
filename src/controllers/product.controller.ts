@@ -8,7 +8,7 @@ import {
 	getStockProduct,
 	updateStockProduct,
 } from "../services/productService";
-import { decryptId, encryptId } from "../services/encryptedId";
+import { decryptId, encryptId } from '../services/encryptedId';
 
 export const addProduct = async (req: Request, res: Response) => {
 	const {
@@ -22,8 +22,9 @@ export const addProduct = async (req: Request, res: Response) => {
 		stock,
 		minimum_stock,
 	} = req.body;
+	const decryptIdedUser = decryptId(id_user);
 	const decryptedCategory = decryptId(categoryId);
-
+	console.log(id_user)
 	const files = req.files as Express.Multer.File[];
 
 	const mediaData = files.map((file, index) => ({
@@ -46,7 +47,7 @@ export const addProduct = async (req: Request, res: Response) => {
 			mediaData,
 			parseInt(stock),
 			parseInt(minimum_stock),
-			parseInt(id_user)
+			parseInt(decryptIdedUser)
 		);
 
 		res.status(201).json({message:"Producto creado exitosamente", product:newProduct});
