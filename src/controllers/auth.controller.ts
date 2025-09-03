@@ -29,7 +29,7 @@ export const login = async (req:Request,res:Response)=>{
 
 	const token = jwt.sign(payload,process.env.JWT_SECRET as string,{expiresIn:"8h"});
 	const cookieOptions = {
-        httpOnly: true,
+        httpOnly: false,
         sameSite: 'none' as const, // 'as const' ayuda a TypeScript
         secure: process.env.NODE_ENV === "production",
         path: '/',
