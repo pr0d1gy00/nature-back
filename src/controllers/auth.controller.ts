@@ -34,7 +34,6 @@ export const login = async (req:Request,res:Response)=>{
         secure: process.env.NODE_ENV === "production",
         path: '/',
         maxAge: 12 * 60 * 60 * 1000,
-		domain: process.env.COOKIE_DOMAIN
     };
     console.log("Intentando establecer cookie. Opciones:", cookieOptions);
 	res.cookie("token", token, cookieOptions);
