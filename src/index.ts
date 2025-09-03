@@ -39,7 +39,7 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 app.use("/api/nature/auth",authRoutes);
-app.use("/api/nature/user",authenticateToken, userRoutes );
+app.use("/api/nature/user", userRoutes );
 app.use("/api/nature/category",authenticateToken, categoryRoutes );
 app.use("/api/nature/product", productRoutes );
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
