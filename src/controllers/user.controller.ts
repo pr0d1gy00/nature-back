@@ -12,6 +12,9 @@ export const addUser = async (req:Request, res:Response, next:NextFunction)=>{
 	if(userData.password.length < 6){
 		return res.status(400).json({ message: "La contraseña debe tener al menos 6 caracteres" });
 	}
+	if(userData.phone.length < 8 || userData.phone.length > 15){
+		return res.status(400).json({ message: "El teléfono debe tener entre 8 y 15 caracteres" });
+	}
 	if(!userData.email.includes('@')){
 		return res.status(400).json({ message: "El email no es válido" });
 	}
