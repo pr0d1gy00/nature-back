@@ -33,6 +33,7 @@ export const createOrderByUser = async ({
 		if (!data || data.length === 0) {
 			throw new Error("No se han proporcionado productos");
 		}
+		console.log(data)
 		const existingProducts = await prisma.product.findMany({
 			where: {
 				id: {
@@ -59,6 +60,29 @@ export const createOrderByUser = async ({
 		}
 		if (!validUserExist) {
 			throw new Error("El usuario no existe");
+		}
+		const validateStock = await Promise.all(
+			data.map(async (item) => {
+				const inventory = await prisma.inventory.findUnique({
+					where: { product_id: item.product_id },
+				});
+				if (!inventory) {
+					throw new Error(
+						`No se encontró inventario para el producto con ID: ${item.product_id}`
+					);
+				}
+				if (inventory.stock < item.quantity) {
+					throw new Error(
+						`No hay suficiente stock para uno o más productos de los que quieres comprar`
+					);
+				}
+				return true;
+			}
+		))
+		if (validateStock.includes(false)) {
+			throw new Error(
+				"No hay suficiente stock para uno o más productos"
+			);
 		}
 		const order = await prisma.order.create({
 			data: {
@@ -229,6 +253,20 @@ export const uploadMediaOrderPayment = async (
 	mediaData: Omit<ProductMediaPropsWithoutId, "type">[]
 ) => {
 	try {
+		const productsOrder = await prisma.ordersProducts.findMany({
+			where: { order_id: orderId },
+		})
+		if(productsOrder.length === 0) throw new Error("No se encontraron productos en la orden");
+		const productHaveStock = await Promise.all(productsOrder.map(async (item)=>{
+			const inventory = await prisma.inventory.findUnique({
+				where: { product_id: item.product_id },
+			});
+			if(!inventory) throw new Error("No se encontró inventario para el producto con ID: " + item.product_id);
+			if(inventory.stock < item.quantity) throw new Error("No hay suficiente stock para uno o más productos de los que quieres comprar");
+			return true;
+		}	));
+		if(productHaveStock.includes(false)) throw new Error("No hay suficiente stock para uno o más productos en la orden");
+
 		return await prisma.$transaction(async (tx) => {
 
 			const order = await tx.order.findUnique({
@@ -253,6 +291,20 @@ export const uploadMediaOrderPayment = async (
 					updated_at: new Date(),
 				},
 			});
+
+			const updateInventory = await Promise.all(productsOrder.map(
+				async (item) =>{
+					const inventory = await tx.inventory.update({
+						where: { product_id: item.product_id },
+						data: {
+							stock: {
+								decrement: item.quantity,
+							},
+						},
+					});
+				}
+				)
+			)
 
 		return orderMedia;
 	}) }catch (error: any) {
