@@ -54,6 +54,9 @@ export const getProductByFilters = async (filters: any) => {
 				category: categoryFilter, // Aplicar filtro de categorías si existe
 				price: priceFilter, // Aplicar filtro de precios si existe
 				deleted_at: null, // Solo productos no eliminados
+				AND: {
+					is_active: true, // Solo productos activos
+				},
 			},
 			include: {
 				product_media: true, // Incluir medios relacionados

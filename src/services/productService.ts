@@ -65,6 +65,7 @@ export const createProduct = async (
 		const product = await prisma.product.create({
 			data: {
 				...data,
+				is_active:true
 			},
 		});
 		const productMedia = await prisma.productMedia.createMany({
