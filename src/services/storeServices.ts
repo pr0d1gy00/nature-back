@@ -7,6 +7,9 @@ export const getProductsToStore = async () => {
 		const products = await prisma.product.findMany({
 			where: {
 				deleted_at: null,
+				AND: {
+					is_active: true,
+				},
 			},
 			include: {
 				product_media: true,
