@@ -9,9 +9,19 @@ export const addUser = async (req:Request, res:Response, next:NextFunction)=>{
 	if (!userData.email || !userData.password || !userData.name || !userData.phone || !userData.address || !userData.dni) {
 		return res.status(400).json({ message: "Faltan datos obligatorios" });
 	}
+	if(userData.name.length < 3){
+		return res.status(400).json({ message: "El nombre debe tener al menos 3 caracteres" });
+	}
+	if(userData.dni.length < 7 || userData.dni.length > 12){
+		return res.status(400).json({ message: "El DNI debe tener entre 7 y 12 caracteres" });
+	}
+	if(userData.name && /[\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(userData.name)){
+		return res.status(400).json({ message: "El nombre no debe contener caracteres especiales, ni numeros" });
+	}
 	if(userData.password.length < 6){
 		return res.status(400).json({ message: "La contraseña debe tener al menos 6 caracteres" });
 	}
+	userData.phone = userData.phone.replace(/\D/g, '');
 	if(userData.phone.length < 8 || userData.phone.length > 15){
 		return res.status(400).json({ message: "El teléfono debe tener entre 8 y 15 caracteres" });
 	}
